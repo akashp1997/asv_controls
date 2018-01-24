@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="controllers">
 <transmission name="left_thruster_rotation">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="body_to_thruster_left">
-    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  <joint name="left_thruster_to_prop">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
   </joint>
   <actuator name="left_thruster_actuator">
     <mechanicalReduction>1</mechanicalReduction>
@@ -12,8 +12,8 @@
 
 <transmission name="right_thruster_rotation">
   <type>transmission_interface/SimpleTransmission</type>
-  <joint name="body_to_thruster_right">
-    <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+  <joint name="right_thruster_to_prop">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
   </joint>
   <actuator name="right_thruster_actuator">
     <mechanicalReduction>1</mechanicalReduction>

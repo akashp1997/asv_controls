@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="vel_talker" pkg="asv_controls" type="vel_talker.py" />
+	<node name="thruster_vel_pub" pkg="asv_controls" type="thruster_velocity_publisher.py" />
+	<node name="thruster_controller" pkg="asv_controls" type="thruster_controller.py" />
+
+</launch>

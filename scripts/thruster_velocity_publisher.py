@@ -2,82 +2,47 @@
 import rospy
 import geometry_msgs.msg
 import std_msgs.msg
-import tf
 
-max_ang_vel = 3800
-max_accel = 5
-dist = 10
-rate_pub = 100
-
+MAX_PWM = 1900				#of each thruster
+ZERO_PWM = 1500
+MIN_PWM = 1100
+MAX_LINEAR_ACCEL = 4				#linear accel of the boat
+NO_THRUSTER = 2				#no of thrusters in the boat
+MAX_TIME = 2				#in s
+MAX_ACCEL = MAX_LINEAR_ACCEL/NO_THRUSTER	#linear accel per thruster
+THRUSTER_COB = 0.3			#cob to each thruster
+MAX_ANG_ACCEL = MAX_ACCEL/THRUSTER_COB
+RATE_CHANGE_ACCEL_PWM = MAX_ANG_ACCEL/(MAX_PWM-ZERO_PWM)
+RATE_CHANGE_ACCEL = RATE_CHANGE_ACCEL_PWM/MAX_TIME
+RATE_PUB = 100				#100hz
+left_cmd = 1500
+right_cmd = 1500
 velocity = geometry_msgs.msg.Twist()
-left_acceleration = geometry_msgs.msg.Twist()
-right_acceleration = geometry_msgs.msg.Twist()
-left_velocity = geometry_msgs.msg.Twist()
-right_velocity = geometry_msgs.msg.Twist()
-left_max_velocity = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3(15,0,0), geometry_msgs.msg.Vector3(0,0,0.39269908169))
-left_min_velocity = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3(-10,0,0), geometry_msgs.msg.Vector3(0,0,-0.26179938779))
-right_max_velocity = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3(15,0,0), geometry_msgs.msg.Vector3(0,0,-0.39269908169))
-right_min_velocity = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3(-10,0,0), geometry_msgs.msg.Vector3(0,0,0.26179938779))
 
-
-def set_velocity():
-	global left_velocity
-	global right_velocity
-	global velocity
-	velocity.linear.x = left_velocity.linear.x + right_velocity.linear.x
-	velocity.linear.z = left_velocity.linear.z + right_velocity.linear.z
-	velocity.angular.x = left_velocity.angular.x + right_velocity.angular.x
-	velocity.angular.z = left_velocity.angular.z + right_velocity.angular.z
-
-def velocity_publish():
-	global left_velocity
-	global right_velocity
-	pub = rospy.Publisher("/asv/left_thruster_controller/velocity", geometry_msgs.msg.Twist, queue_size=10)
-	pub1 = rospy.Publisher("/asv/right_thruster_controller/velocity", geometry_msgs.msg.Twist, queue_size=10)
-	pub2 = rospy.Publisher("/asv/velocity", geometry_msgs.msg.Twist, queue_size=10)
-	rate = rospy.Rate(100)
+def listener():
+	rospy.init_node("rpm_controller")
+	rospy.Subscriber("/asv/left_thruster/command", std_msgs.msg.Float64, callback, callback_args=True)
+	rospy.Subscriber("/asv/right_thruster/command", std_msgs.msg.Float64, callback, callback_args=False)
+	global left_cmd, right_cmd, velocity
+	rate = rospy.Rate(RATE_PUB)
+	pub = rospy.Publisher("/asv/velocity", geometry_msgs.msg.Twist, queue_size=10)
 	while not rospy.is_shutdown():
-		set_velocity()
-		pub.publish(left_velocity)
-		pub1.publish(right_velocity)
-		pub2.publish(velocity)
+		linear = (left_cmd+right_cmd-(ZERO_PWM*2))*MAX_ACCEL/(MAX_PWM-ZERO_PWM)
+		angular = (right_cmd-left_cmd)*MAX_ANG_ACCEL/(MAX_PWM-ZERO_PWM)
+		accel = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3(linear,0,0), geometry_msgs.msg.Vector3(0,0,angular))
+		velocity.linear.x += accel.linear.x/RATE_PUB
+		velocity.angular.z += accel.angular.z/RATE_PUB
+		rospy.loginfo(velocity)
+		pub.publish(velocity)
 		rate.sleep()
-
-def command_controller():
-	rospy.init_node("thruster_control")
-	rospy.Subscriber("/asv/left_thruster_controller/command", std_msgs.msg.Float64, left_accel_callback)
-	rospy.Subscriber("/asv/right_thruster_controller/command", std_msgs.msg.Float64, right_accel_callback)
-	velocity_publish()
 	rospy.spin()
 
-def left_accel_callback(data):
-	global left_acceleration, max_ang_vel, max_accel, dist, rate_pub, left_velocity, left_acceleration
-	ang_vel = float(data.data)
-	left_acceleration = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3((float(max_accel)*ang_vel/max_ang_vel), 0, 0), geometry_msgs.msg.Vector3(0,0,(float(max_accel)*ang_vel/max_ang_vel/dist)))
-	left_velocity.linear.x += left_acceleration.linear.x/100
-	left_velocity.angular.z += left_acceleration.angular.z/100
-	if(left_velocity.linear.x>left_max_velocity.linear.x):
-		left_velocity.linear.x = left_max_velocity.linear.x
-	if(left_velocity.angular.z>left_max_velocity.angular.z):
-		left_velocity.angular.z = left_max_velocity.angular.z
-	if(left_velocity.linear.x<left_min_velocity.linear.x):
-		left_velocity.linear.x = left_min_velocity.linear.x
-	if(left_velocity.angular.z<left_min_velocity.angular.z):
-		left_velocity.angular.z = left_min_velocity.angular.z
+def callback(data, args):
+	global left_cmd, right_cmd
+	left = args
+	if(left):
+		left_cmd = data.data
+	else:
+		right_cmd = data.data
 
-def right_accel_callback(data):
-	global right_acceleration, max_ang_vel, max_accel, dist, rate_pub, right_velocity, right_acceleration
-	ang_vel = float(data.data)
-	right_acceleration = geometry_msgs.msg.Twist(geometry_msgs.msg.Vector3((float(max_accel)*ang_vel/max_ang_vel), 0, 0), geometry_msgs.msg.Vector3(0,0,-(float(max_accel)*ang_vel/max_ang_vel/dist)))
-	right_velocity.linear.x += right_acceleration.linear.x/rate_pub
-	right_velocity.angular.z += right_acceleration.angular.z/rate_pub
-	if(right_velocity.linear.x>right_max_velocity.linear.x):
-		right_velocity.linear.x = right_max_velocity.linear.x
-	if(right_velocity.angular.z<right_max_velocity.angular.z):
-		right_velocity.angular.z = right_max_velocity.angular.z
-	if(right_velocity.linear.x<right_min_velocity.linear.x):
-		right_velocity.linear.x = right_min_velocity.linear.x
-	if(right_velocity.angular.z>right_min_velocity.angular.z):
-		right_velocity.angular.z = right_min_velocity.angular.z
-
-command_controller()
+listener()

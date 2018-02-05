@@ -3,11 +3,11 @@ asv:
     type: joint_state_controller/JointStateController
     publish_rate: 50  
   # Effort Controllers ---------------------------------------
-  left_thruster_controller:
-    type: velocity_controllers/JointVelocityController
-    joint: left_thruster_to_prop
-    pid: {p: 0.95, i: 0.95, d: 0.95}
-  right_thruster_controller:
-    type: velocity_controllers/JointVelocityController
-    joint: left_thuster_to_prop
-    pid: {p: 0.95, i: 0.95, d: 0.95}
+  #left_thruster_controller:
+  #  type: velocity_controllers/JointEffortController
+  #  joint: left_thruster_to_prop
+  #  pid: {p: 0.95, i: 0.95, d: 0.95}
+  #right_thruster_controller:
+  #  type: velocity_controllers/JointVelocityController
+  #  joint: right_thuster_to_prop
+  #  pid: {p: 0.95, i: 0.95, d: 0.95}

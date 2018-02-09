@@ -6,43 +6,43 @@ import geometry_msgs.msg
 import nav_msgs.msg
 
 THRUSTER_COB = 0.3
+cmd_vel = [0,0]
+odom = [0,0]
 
-def talker():
+
+def listener():
 	rospy.init_node("thruster_control_splitter")
-	rospy.Subscriber("/cmd_vel", geometry_msgs.msg.Twist, callback)
-	rospy.Subscriber("/odom", nav_msgs.msg.Odometry, feedback)
+	rospy.Subscriber("/cmd_vel", geometry_msgs.msg.Twist, callback, callback_args=True)
+	rospy.Subscriber("/odom", nav_msgs.msg.Odometry, callback, callback_args=False)
+	talker()
 	rospy.spin()
 
-def callback(data):
-	x = data.linear.x
-	z = data.angular.z
-	pub_l = rospy.Publisher("/left_thruster/cmd_vel", std_msgs.msg.Float64, queue_size=10)
-	pub_r = rospy.Publisher("/right_thruster/cmd_vel", std_msgs.msg.Float64, queue_size=10)
+def callback(data, cmd):
+	global cmd_vel, odom
+	"""This function publishes the required angular velocity for each thruster as float value."""
+	if cmd==True:
+		cmd_vel = [data.linear.x, data.angular.z]
+		#rospy.loginfo(cmd_vel)
+	else:
+		odom = [data.twist.twist.linear.x, data.twist.twist.angular.z]
+
+def talker():
+	global cmd_vel, odom
+	cmd_pub_l = rospy.Publisher("/left_thruster/cmd_vel", std_msgs.msg.Float64, queue_size=10)
+	cmd_pub_r = rospy.Publisher("/right_thruster/cmd_vel", std_msgs.msg.Float64, queue_size=10)
+	odom_pub_l = rospy.Publisher("/left_thruster/odom", std_msgs.msg.Float64, queue_size=10)
+	odom_pub_r = rospy.Publisher("/right_thruster/odom", std_msgs.msg.Float64, queue_size=10)
 	rate = rospy.Rate(100)
 	while not rospy.is_shutdown():
-		if(not data):
-			w_l = 0
-			w_r = 0
-		w_l = 0.5*(x/THRUSTER_COB-z)
-		w_r = 0.5*(x/THRUSTER_COB+z)
-		pub_l.publish(w_l)
-		pub_r.publish(w_r)
+		l_cmd = 0.5*(cmd_vel[0]/THRUSTER_COB-cmd_vel[1])
+		r_cmd = 0.5*(cmd_vel[0]/THRUSTER_COB+cmd_vel[1])
+		l_odom = 0.5*(odom[0]/THRUSTER_COB-odom[1])
+		r_odom = 0.5*(odom[0]/THRUSTER_COB+odom[1])
+		cmd_pub_l.publish(l_cmd)
+		cmd_pub_r.publish(r_cmd)
+		odom_pub_l.publish(l_odom)
+		odom_pub_r.publish(r_odom)
+		rospy.loginfo(str(l_cmd)+" "+str(r_cmd)+"|"+str(l_odom)+" "+str(r_odom))
 		rate.sleep()
 
-def feedback(data):
-	x = data.twist.twist.linear.x
-	z = data.twist.twist.angular.z
-	pub_l = rospy.Publisher("/left_thruster/odom", std_msgs.msg.Float64, queue_size=10)
-	pub_r = rospy.Publisher("/right_thruster/odom", std_msgs.msg.Float64, queue_size=10)
-	rate = rospy.Rate(100)
-	while not rospy.is_shutdown():
-		if(not data):
-			w_l = 0
-			w_r = 0
-		w_l = 0.5*(x/THRUSTER_COB-z)
-		w_r = 0.5*(x/THRUSTER_COB+z)
-		pub_l.publish(w_l)
-		pub_r.publish(w_r)
-		rate.sleep()	
-
-talker()
+listener()

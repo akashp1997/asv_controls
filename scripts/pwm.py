@@ -22,9 +22,9 @@ def listener():
 
 def pwm(data, left):
 	if(left):
-		pub = rospy.Publisher("/left_pwm", std_msgs.Float64, queue_size=10)
+		pub = rospy.Publisher("/left_pwm", std_msgs.msg.Float64, queue_size=10)
 	else:
-		pub = rospy.Publisher("/right_pwm", std_msgs.Float64, queue_size=10)
+		pub = rospy.Publisher("/right_pwm", std_msgs.msg.Float64, queue_size=10)
 	rate = rospy.Rate(100)
 	while not rospy.is_shutdown():
 		pub.publish(1500+data.data/RATIO)

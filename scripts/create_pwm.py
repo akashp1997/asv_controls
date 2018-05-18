@@ -29,29 +29,20 @@ def publish():
 	pub_l = rospy.Publisher("/left_pwm", Float64, queue_size=10)
 	pub_r = rospy.Publisher("/right_pwm", Float64, queue_size=10)
 	while not rospy.is_shutdown():
-		if angular==0:
-			if linear>=0:
-				x = linear/2
-				y = linear/2
-			else:
-				x = -linear/(2*c)
-				y = -linear/(2*c)
-		elif angular>0:
-			x = (0.5/c)*(angular/0.3-linear)
-			y = (0.5)*(angular/0.3+linear)
-		else:
-			x = (0.5)*(angular/0.3+linear)
-			y = (0.5/c)*(angular/0.3-linear)
-		if x>400:
-			x = 400
-		if x<-400:
-			x = -400
-		if y>400:
-			y = 400
-		if y<-400:
-			y = 400
-		pub_l.publish(x+1500)
-		pub_r.publish(y+1500)
+		pwm_l = int(1500+linear-angular)
+		pwm_r = int(1500+linear+angular)
+		if(pwm_l>1900):
+			pwm_l = 1900
+		if(pwm_l<1100):
+			pwm_l = 1100
+		if(pwm_r>1900):
+			pwm_r = 1900
+		if(pwm_r<1100):
+			pwm_r = 1100
+		pub_l.publish(pwm_l)
+		pub_r.publish(pwm_r)
+
+		#rospy.loginfo("%d %d" % (int(1500+linear-angular),int(1500+linear+angular)))
 		rate.sleep()
 
 listener()

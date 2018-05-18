@@ -9,6 +9,7 @@ def talker():
 	pub = rospy.Publisher("/cmd_vel", geometry_msgs.msg.Twist, queue_size=10)
 	rate = rospy.Rate(100)
 	while not rospy.is_shutdown():
+		msg.linear.x = 0.05
 		msg.angular.z = 0.3
 		pub.publish(msg)
 		rate.sleep()

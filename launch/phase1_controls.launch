@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<launch>
+
+	<node name="vel_splitter" pkg="asv_controls" type="split_vel.py" />
+
+	<include file="$(find asv_controls)/launch/pid.launch" />
+
+	<node name="pwm_generator" pkg="asv_controls" type="create_pwm.py" />
+
+	<node name="pwm_socket" pkg="asv_controls" type="send_pwm.py" output="screen" />
+</launch>

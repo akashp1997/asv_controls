@@ -1,18 +1,23 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 import rospy
 
 import dynamic_reconfigure.client
 
-def callback(config):
-    rospy.loginfo("Config set to {int_param}, {double_param}, {str_param}, {bool_param}, {size}".format(**config))
+rospy.init_node("dynamic_client")
 
-if __name__ == "__main__":
-    rospy.init_node("dynamic_client")
+def callback(data):
+	rospy.loginfo(data)
 
-    rospy.wait_for_service("/lin/pid")
-    client = dynamic_reconfigure.client.Client("/lin/pid", timeout=30, config_callback=callback)
+client = dynamic_reconfigure.client.Client("/lin/pid", timeout=0.1)
 
-    r = rospy.Rate(1)
-    while not rospy.is_shutdown():
-        client.get_configuration()
-        r.sleep()
+r = rospy.Rate(1)
+
+
+count = 1
+while not rospy.is_shutdown():
+	conf = client.get_configuration()
+	rospy.loginfo(conf)
+	client.update_configuration(conf)
+	rospy.loginfo("Update")
+	count += 1
+	r.sleep()

@@ -11,7 +11,7 @@ def listener():
 	rospy.spin()
 
 def callback(data):
-	file.write(str(data.data)+"\n")
+	file.write(str(rospy.Time.now().to_sec())+","+str(data.data)+"\n")
 try:
 	listener()
 except:

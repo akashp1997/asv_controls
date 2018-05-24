@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-    <node name="pid" pkg="pid" type="controller" ns="lin" output="screen" >
-      <param name="Kp" value="9375" />
-      <param name="Ki" value="0" />
-      <param name="Kd" value="0" />
+    <node name="pid" pkg="pid" type="controller" ns="lin" >
+      <param name="Kp" value="321" />
+      <param name="Ki" value="2899" />
+      <param name="Kd" value="7500.3" />
       
       <!--<param name="windup_limit" value="2.4833343" />
       <param name="cutoff_frequency" value="20" />
@@ -14,10 +14,10 @@
       <param name="setpoint_topic" value="cmd" />
      </node>
 
-    <node name="pid" pkg="pid" type="controller" ns="ang" output="screen" >
-      <param name="Kp" value="0" />
-      <param name="Ki" value="0" />
-      <param name="Kd" value="0" />
+    <node name="pid" pkg="pid" type="controller" ns="ang" >
+      <param name="Kp" value="600" />
+      <param name="Ki" value="1800" />
+      <param name="Kd" value="6000" />
       <!--<param name="windup_limit" value="2.4833343" />
       <param name="cutoff_frequency" value="20" />
       <param name="max_loop_frequency" value="105.0" />

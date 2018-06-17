@@ -3,6 +3,13 @@ project(asv_controls)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roscpp
+  std_msgs
+  dynamic_reconfigure
+)
+
+catkin_package(  
+	CATKIN_DEPENDS roscpp std_msgs dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -126,6 +133,12 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/asv_controls_node.cpp)
+add_executable(autotune src/autotune.cpp)
+
+add_dependencies(autotune ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(autotune ${catkin_LIBRARIES})
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -189,3 +202,5 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+

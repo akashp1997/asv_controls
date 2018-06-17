@@ -15,4 +15,8 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>rospy</exec_depend>
 
+  <depend>roscpp</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>std_msgs</depend>
+
 </package>

@@ -29,21 +29,23 @@ def callback(data, lin):
 
 def publish():
 	global linear, angular, c, pub_l, pub_r, pub_f
-	pwm_l = int(1500+linear/2)
-	pwm_r = int(1500+linear/2)
+	linear *= 0.4
+	angular *= 0.4
+	pwm_l = int(1500+linear)
+	pwm_r = int(1500+linear)
 	pwm_f = int(1500+angular)
-	if(pwm_l>1900):
-		pwm_l = 1900
-	if(pwm_l<1100):
-		pwm_l = 1100
-	if(pwm_r>1900):
-		pwm_r = 1900
-	if(pwm_r<1100):
-		pwm_r = 1100
-	if(pwm_r>1900):
-		pwm_r = 1900
-	if(pwm_r<1100):
-		pwm_r = 1100
+	#if(pwm_l>1900):
+	#	pwm_l = 1900
+	#if(pwm_l<1100):
+	#	pwm_l = 1100
+	#if(pwm_r>1900):
+	#	pwm_r = 1900
+	#if(pwm_r<1100):
+	#	pwm_r = 1100
+	#if(pwm_f>1900):
+	#	pwm_f = 1900
+	#if(pwm_f<1100):
+	#	pwm_f = 1100
 	pub_l.publish(pwm_l)
 	pub_r.publish(pwm_r)
 	pub_f.publish(pwm_f)

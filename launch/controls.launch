@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <launch>
 
+  <arg name="thruster_port" default="/dev/ttyACM0" />
+
 	<node name="vel_splitter" pkg="asv_controls" type="split_vel" />
 
     <node name="pid" pkg="pid" type="controller" ns="lin" >
@@ -34,5 +36,7 @@
 
 	<node name="pwm_generator" pkg="asv_controls" type="create_pwm" />
 
-	<!--<node name="pwm_socket" pkg="asv_controls" type="send_pwm" output="screen" />-->
+	<node name="pwm_serial" pkg="asv_controls" type="send_pwm" output="screen">
+    <param name="port" value="$(arg thruster_port)" />
+  </node>
 </launch>
